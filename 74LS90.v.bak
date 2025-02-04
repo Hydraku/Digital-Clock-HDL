@@ -1,0 +1,70 @@
+module IC90(
+    input wire CKA,   // Clock A (for divide-by-2 section)
+    input wire CKB,   // Clock B (for divide-by-5 section)
+    input wire R0_1,  // Reset 0 (1)
+    input wire R0_2,  // Reset 0 (2)
+    input wire R9_1,  // Reset 9 (1)
+    input wire R9_2,  // Reset 9 (2)
+    output wire QA,   // Output QA (divide-by-2 output)
+    output wire QB,   // Output QB
+    output wire QC,   // Output QC
+    output wire QD    // Output QD
+);
+	 
+	 // Combining reset signals | R9 to JK1
+	 assign set_9 = ~(R9_1 & R9_2);
+	 wire set_9;
+	 assign reset_all = ~(R0_1 & R0_2);
+	 wire reset_all;
+	 
+	 //jk2
+	 wire [0:0] w;
+	 assign reset_jk2 = ~reset_all | ~set_9;
+	 wire reset_jk2;
+	
+	 
+    // QA
+    IC76_JK JK1 (
+        .clk(CKA),  
+        .set(set_9), 
+        .j(), 
+        .k(),
+		  .reset(reset_all), 
+        .q(QA), 
+        .q_inverted()
+    );
+
+    // QB,
+    IC76_JK JK2 (
+        .clk(CKB),  
+        .set(), 
+        .j(w[0]), 
+        .k(), 
+		  .reset(reset_jk2),
+        .q(QB), 
+        .q_inverted()
+    );
+	
+	// QC
+    IC76_JK JK3 (
+        .clk(QB),  
+        .set(), 
+        .j(), 
+        .k(),
+		  .reset(reset_jk2), 
+        .q(QC), 
+        .q_inverted()
+    );
+	
+	//QD
+    IC76_JK JK4 (
+        .clk(CKB), 
+        .set(set_9), 
+        .j(QB & QC), 
+        .k(QD),
+		  .reset(reset_all), 
+        .q(QD), 
+        .q_inverted(w[0])
+    );
+
+endmodule

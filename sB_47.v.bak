@@ -1,0 +1,12 @@
+module sB(
+    input A,
+    input B,
+    input C,
+    input D,
+    output b
+);
+	 //b = A'B' + A'C'D' + A'CD + AB'C'
+
+    assign b = (~A & ~B) | (~A & ~C & ~D) | (~A & C & D) | (A & ~B & ~C);
+	 
+endmodule
